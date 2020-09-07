@@ -7,8 +7,18 @@ import React, { useState } from 'react'
 import axios from "axios"
 import { Button, Card, Checkbox, Form, message, Space, Upload } from "antd"
 import { UploadOutlined } from '@ant-design/icons'
-import "./Spreadsheet.css"
 
+import { SpreadsheetData } from "../data"
+
+const postingUrl = "http://localhost:5000/api/upload"
+
+const genAxiosUrl = (d: string[]) => {
+  if (d.length === 0) return postingUrl
+  let r = `${ postingUrl }?`
+  if (d.includes("head")) r += "head=true"
+  if (d.includes("multiSheets")) r += "multiSheets=true"
+  return r
+}
 
 const inputFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
 const formItemLayout = {
@@ -19,12 +29,14 @@ const formTailLayout = {
   wrapperCol: { offset: 6 }
 }
 
+interface UploaderProps {
+  getData: (value: SpreadsheetData[]) => void
+}
 
-export const Spreadsheet = () => {
+export const Uploader = (props: UploaderProps) => {
 
   const [uploading, setUploading] = useState<boolean>(false)
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
-
 
   const uploadProps = {
     accept: inputFileType,
@@ -37,18 +49,19 @@ export const Spreadsheet = () => {
     fileList: uploadFiles.map((i, j) => ({ ...i, name: i.name, uid: String(j) }))
   }
 
-  const onUploadFile = () => {
+  const onUploadFile = (params: string[]) => {
     if (uploadFiles.length !== 0) {
       const data = new FormData()
       data.append("xlsx_file", uploadFiles[0])
       setUploading(true)
 
       axios
-        .post("http://localhost:5000/api/upload", data)
+        .post(genAxiosUrl(params), data)
         .then(res => {
           message.success(res.statusText)
           setUploading(false)
           setUploadFiles([])
+          props.getData(res.data)
         })
         .catch(err => {
           setUploading(false)
@@ -62,8 +75,8 @@ export const Spreadsheet = () => {
     setUploadFiles([])
   }
   const onFinish = (v: any) => {
-    onUploadFile()
-    // console.log(v.fileStatus)
+    const fs = v.fileStatus
+    onUploadFile(fs)
     onReset()
   }
 
