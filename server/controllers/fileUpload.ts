@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
 })
 
-const upload = multer({ storage }).single("file")
+const upload = multer({ storage }).single("xlsx_file")
 
 export const uploadFile = (req: Request, res: Response) => {
   upload(req, res, (err: any) => {

@@ -5,52 +5,103 @@
 import React, { useState } from 'react'
 
 import axios from "axios"
-import { Button, Card, Form } from "react-bootstrap"
+import { Button, Card, Checkbox, Form, message, Space, Upload } from "antd"
+import { UploadOutlined } from '@ant-design/icons'
 import "./Spreadsheet.css"
 
 
 const inputFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+const formItemLayout = {
+  labelCol: { span: 6 },
+  wrapperCol: { span: 14 },
+}
+const formTailLayout = {
+  wrapperCol: { offset: 6 }
+}
+
 
 export const Spreadsheet = () => {
 
-  const [uploadFile, setUploadFile] = useState<File>()
+  const [uploading, setUploading] = useState<boolean>(false)
+  const [uploadFiles, setUploadFiles] = useState<File[]>([])
 
-  const importOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
-    if (e.target.files) setUploadFile(e.target.files[0])
+  const uploadProps = {
+    accept: inputFileType,
+    multiple: false,
+    beforeUpload: (file: File) => {
+      setUploadFiles([file])
+      return false
+    },
+    onRemove: () => setUploadFiles([]),
+    fileList: uploadFiles.map((i, j) => ({ ...i, name: i.name, uid: String(j) }))
   }
 
   const onUploadFile = () => {
-    if (uploadFile) {
+    if (uploadFiles.length !== 0) {
       const data = new FormData()
-      data.append("file", uploadFile)
+      data.append("xlsx_file", uploadFiles[0])
+      setUploading(true)
 
       axios
         .post("http://localhost:5000/api/upload", data)
-        .then(res => alert(res.statusText))
+        .then(res => {
+          message.success(res.statusText)
+          setUploading(false)
+          setUploadFiles([])
+        })
+        .catch(err => {
+          setUploading(false)
+          message.error(JSON.stringify(err, null, 2))
+        })
     }
   }
 
-  return (
-    <Card>
-      <Card.Title>File Upload</Card.Title>
-      <Card.Body>
-        <Form>
-          <Form.Group>
-            <Form.Label>Choose File</Form.Label>
-            <Form.File
-              id="upload-zone"
-              type="file"
-              accept={ inputFileType }
-              onChange={ importOnChange }
-            />
-          </Form.Group>
+  const onReset = () => {
+    setUploading(false)
+    setUploadFiles([])
+  }
+  const onFinish = (v: any) => {
+    onUploadFile()
+    // console.log(v.fileStatus)
+    onReset()
+  }
 
-          <Form.Group>
-            <Button onClick={ onUploadFile }>Upload</Button>
-          </Form.Group>
-        </Form>
-      </Card.Body>
+  return (
+    <Card title="File Upload">
+      <Form { ...formItemLayout } onFinish={ onFinish }>
+        <Form.Item name="fileUpload" label="File">
+          <Upload { ...uploadProps }>
+            <Button icon={ <UploadOutlined/> }>Click to upload</Button>
+          </Upload>
+        </Form.Item>
+
+        <Form.Item name="fileStatus" label="Status">
+          <Checkbox.Group>
+            <Checkbox value="head">Has head</Checkbox>
+            <Checkbox value="multiSheets">Multiple sheets</Checkbox>
+          </Checkbox.Group>
+        </Form.Item>
+
+        <Form.Item { ...formTailLayout }>
+          <Space>
+            <Button
+              type="primary"
+              htmlType="submit"
+              disabled={ uploadFiles.length === 0 }
+              loading={ uploading }
+            >
+              Submit
+            </Button>
+            <Button
+              htmlType="button"
+              onClick={ onReset }
+            >
+              Reset
+            </Button>
+          </Space>
+        </Form.Item>
+      </Form>
     </Card>
   )
 }
