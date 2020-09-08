@@ -5,7 +5,7 @@
 import express from "express"
 import cors from "cors"
 import path from "path"
-import { uploadFile } from "./controllers/fileUpload"
+import { saveXlsxFile, saveThenExtractXlsxFile, extractXlsxFile } from "./controllers/fileManagement"
 
 const app = express()
 
@@ -18,7 +18,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // Api
-app.post("/api/upload", uploadFile)
+app.post("/api/saveXlsxFile", saveXlsxFile)
+app.post("/api/saveThenExtractXlsxFile", saveThenExtractXlsxFile)
+app.post("/api/extractXlsxFile", extractXlsxFile)
 
 // Environment
 if (process.env.NODE_ENV === "production") {

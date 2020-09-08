@@ -4,7 +4,7 @@
 
 import React from "react"
 import { HotTable } from "@handsontable/react"
-import { Tabs } from "antd"
+import { Card, Tabs } from "antd"
 
 import { SpreadsheetData } from "../data"
 import "./Spreadsheet.css"
@@ -16,34 +16,49 @@ interface SpreadsheetProps {
   data: SpreadsheetData[]
 }
 
+const hotTableProps = {
+  settings: {
+    width: "100%",
+    height: "40vh"
+  },
+  colHeaders: true,
+  rowHeaders: true,
+  licenseKey: licenseKey,
+}
 
 export const Spreadsheet = (props: SpreadsheetProps) => {
 
+  const singleS = () => (
+    <HotTable
+      { ...hotTableProps }
+      data={ props.data[0].data }
+    />
+  )
+
+  const multiS = () => (
+    <Tabs>
+      {
+        props.data.map((i: SpreadsheetData) =>
+          (
+            <Tabs.TabPane tab={ i.name } key={ i.name }>
+              <HotTable
+                { ...hotTableProps }
+                data={ i.data }
+              />
+            </Tabs.TabPane>
+          )
+        )
+      }
+    </Tabs>
+  )
 
   return (
-    <div style={{background: "white"}}>
+    <Card>
       {
-        <Tabs type="card">
-          {
-            props.data.map((i: SpreadsheetData) =>
-              (
-                <Tabs.TabPane tab={ i.name } key={ i.name }>
-                  <HotTable
-                    data={ i.data }
-                    settings={ {
-                      width: "100%",
-                      height: "40vh"
-                    } }
-                    colHeaders
-                    rowHeaders
-                    licenseKey={ licenseKey }
-                  />
-                </Tabs.TabPane>
-              )
-            )
-          }
-        </Tabs>
+        props.data.length === 1 ?
+          singleS() : multiS()
       }
-    </div>
+    </Card>
   )
+
 }

@@ -12,7 +12,7 @@ function App() {
   const [data, setData] = useState<SpreadsheetData[]>()
 
   return (
-    <div style={ { height: "100vh", background: "gray" } }>
+    <div style={ { height: "100vh", background: "lightgray" } }>
       <Row style={ { paddingTop: 20 } }>
         <Col offset={ 1 } span={ 6 }>
           <Uploader getData={ setData }/>

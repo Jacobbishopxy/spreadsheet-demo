@@ -10,7 +10,7 @@ import { UploadOutlined } from '@ant-design/icons'
 
 import { SpreadsheetData } from "../data"
 
-const postingUrl = "http://localhost:5000/api/upload"
+const postingUrl = "http://localhost:2999/api/extractXlsxFile"
 
 const genAxiosUrl = (d: string[]) => {
   if (d.length === 0) return postingUrl
@@ -34,6 +34,8 @@ interface UploaderProps {
 }
 
 export const Uploader = (props: UploaderProps) => {
+
+  const [form] = Form.useForm()
 
   const [uploading, setUploading] = useState<boolean>(false)
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
@@ -73,23 +75,24 @@ export const Uploader = (props: UploaderProps) => {
   const onReset = () => {
     setUploading(false)
     setUploadFiles([])
+    form.resetFields()
   }
   const onFinish = (v: any) => {
-    const fs = v.fileStatus
-    onUploadFile(fs)
+    const fo = v.fileOptions ? v.fileOptions : []
+    onUploadFile(fo)
     onReset()
   }
 
   return (
     <Card title="File Upload">
-      <Form { ...formItemLayout } onFinish={ onFinish }>
+      <Form { ...formItemLayout } form={ form } onFinish={ onFinish }>
         <Form.Item name="fileUpload" label="File">
           <Upload { ...uploadProps }>
             <Button icon={ <UploadOutlined/> }>Click to upload</Button>
           </Upload>
         </Form.Item>
 
-        <Form.Item name="fileStatus" label="Status">
+        <Form.Item name="fileOptions" label="Options">
           <Checkbox.Group>
             <Checkbox value="head">Has head</Checkbox>
             <Checkbox value="multiSheets">Multiple sheets</Checkbox>
