@@ -36,7 +36,7 @@ export const Spreadsheet = (props: SpreadsheetProps) => {
   )
 
   const multiS = () => (
-    <Tabs>
+    <Tabs tabPosition="bottom">
       {
         props.data.map((i: SpreadsheetData) =>
           (

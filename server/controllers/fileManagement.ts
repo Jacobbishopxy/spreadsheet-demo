@@ -60,14 +60,10 @@ const readFromXlsx = async (filepath: string, options: readXlsxOptions) => {
 
   let book: Spreadsheet[] = []
 
-  if (options.multiSheets) {
-    const s = f.getWorksheet(1)
-    recordXlsxRows(book, s)
-  } else {
-    f.eachSheet(worksheet => {
-      recordXlsxRows(book, worksheet)
-    })
-  }
+  if (options.multiSheets)
+    f.eachSheet(worksheet => recordXlsxRows(book, worksheet))
+  else
+    recordXlsxRows(book, f.getWorksheet(1))
 
   return book
 }
